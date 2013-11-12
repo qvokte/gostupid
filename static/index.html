@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>a really dumb game</title>
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+		<script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script>
+			var connection = null;
+
+			function log(msg) {
+				$("#log").append(msg + "<br/>");
+			}
+
+			$(function() {
+				$("#open").click(function() {
+					connection = new WebSocket('ws://localhost:8000/ws')
+
+					connection.onopen = function() {
+						log("[[ connection opened ]]");
+					};
+
+					connection.onerror = function(err) {
+						log("[[ connection error: " + error + " ]]");
+					}
+
+					connection.onmessage = function(e) {
+						log(e.data);
+					}
+				});
+
+				$("#close").click(function() {
+					connection.close();
+					connection = null;
+					log("[[ connection closed ]]");
+				});
+
+
+				$("#req").submit(function(e) {
+					e.preventDefault();
+
+					if (connection == null) {
+						log("[[ no connection ]]");
+						return;
+					}
+
+					connection.send($("#msg").val());
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<h3>Socket</h3>
+			<button id="open" class="btn btn-success btn-lg">Open</button>
+			<button id="close" class="btn btn-danger btn-lg">Close</button>
+
+			<h3>Client Request</h3>
+			<form id="req" class="form">
+				<div class="form-group">
+					<input type="text" class="form-control" name="msg" id="msg" placeholder="Message" />
+				</div>
+				<button type="Submit" class="btn btn-primary">Send it</button>
+			</form>
+
+			<h3>Server Log</h3>
+			<div class="well" id="log">
+
+			</div>
+		</div>
+	</body>
+</html>
